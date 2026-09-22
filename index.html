@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>ผู้ช่วยแปลภาษา</title>
+
+  <!-- OCR -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f3e8ff;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 650px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+
+    h1 {
+      text-align: center;
+      color: #713bb3;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #777;
+      margin-bottom: 25px;
+    }
+
+    .language {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    select {
+      padding: 10px;
+      border: 2px solid #c9a8f5;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    .box {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 140px;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      font-size: 16px;
+      resize: none;
+    }
+
+    button,
+    .file-button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 10px;
+      background: #8651c7;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      display: block;
+      text-align: center;
+    }
+
+    button:hover,
+    .file-button:hover {
+      opacity: 0.9;
+    }
+
+    .scan,
+    .file-button {
+      background: #d47ac8;
+    }
+
+    .sound {
+      background: #4d91d1;
+    }
+
+    #imageInput {
+      display: none;
+    }
+
+    #status {
+      text-align: center;
+      color: #777;
+      margin-top: 15px;
+      display: none;
+    }
+
+    .progress {
+      width: 100%;
+      height: 8px;
+      background: #eee;
+      border-radius: 10px;
+      margin-top: 10px;
+      overflow: hidden;
+      display: none;
+    }
+
+    #progressBar {
+      width: 0%;
+      height: 100%;
+      background: #8651c7;
+    }
+
+    #cameraBox {
+      display: none;
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    #cameraVideo {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 15px;
+      background: #222;
+    }
+
+    #cameraCanvas {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>🗣️ ผู้ช่วยแปลภาษา</h1>
+
+  <div class="subtitle">
+    Thai ↔ English Translator
+  </div>
+
+  <!-- เลือกภาษา -->
+  <div class="language">
+
+    <select id="fromLang">
+      <option value="th">🇹🇭 ไทย</option>
+      <option value="en">🇬🇧 English</option>
+    </select>
+
+    <b>→</b>
+
+    <select id="toLang">
+      <option value="en">🇬🇧 English</option>
+      <option value="th">🇹🇭 ไทย</option>
+    </select>
+
+  </div>
+
+
+  <!-- ข้อความต้นฉบับ -->
+  <div class="box">
+
+    <label>ข้อความต้นฉบับ</label>
+
+    <textarea
+      id="inputText"
+      placeholder="พิมพ์ข้อความ หรือสแกนจากรูปภาพ"></textarea>
+
+
+    <!-- เปิดกล้อง -->
+    <button
+      type="button"
+      class="file-button"
+      onclick="openCamera()">
+      📷 เปิดกล้อง
+    </button>
+
+
+    <!-- กล้อง -->
+    <div id="cameraBox">
+
+      <video
+        id="cameraVideo"
+        autoplay
+        playsinline>
+      </video>
+
+      <button
+        type="button"
+        onclick="takePhoto()">
+        📸 ถ่ายภาพ
+      </button>
+
+      <button
+        type="button"
+        onclick="closeCamera()">
+        ❌ ปิดกล้อง
+      </button>
+
+      <canvas id="cameraCanvas"></canvas>
+
+    </div>
+
+
+    <!-- เลือกรูป -->
+    <label class="file-button">
+
+      🖼️ เลือกรูปจากเครื่อง
+
+      <input
+        id="imageInput"
+        type="file"
+        accept="image/*"
+        onchange="scanImage(event)">
+
+    </label>
+
+  </div>
+
+
+  <!-- สถานะ OCR -->
+
+  <div id="status">
+    กำลังอ่านข้อความจากรูป...
+  </div>
+
+  <div class="progress" id="progress">
+    <div id="progressBar"></div>
+  </div>
+
+
+  <!-- แปลภาษา -->
+
+  <button onclick="translateText()">
+    🌐 แปลภาษา
+  </button>
+
+
+  <!-- ผลลัพธ์ -->
+
+  <div class="box">
+
+    <label>คำแปล</label>
+
+    <textarea
+      id="resultText"
+      placeholder="คำแปลจะแสดงที่นี่"
+      readonly></textarea>
+
+    <button
+      class="sound"
+      onclick="speakText()">
+      🔊 อ่านออกเสียง
+    </button>
+
+  </div>
+
+</div>
+
+
+<script>
+
+let cameraStream = null;
+
+
+// =====================================
+// ระบบแปลภาษา
+// =====================================
+
+async function translateText() {
+
+  const text =
+    document.getElementById("inputText").value.trim();
+
+  const from =
+    document.getElementById("fromLang").value;
+
+  const to =
+    document.getElementById("toLang").value;
+
+  const result =
+    document.getElementById("resultText");
+
+
+  if (text === "") {
+
+    alert("กรุณาใส่ข้อความก่อน");
+
+    return;
+  }
+
+
+  if (from === to) {
+
+    result.value = text;
+
+    return;
+  }
+
+
+  result.value = "กำลังแปล...";
+
+
+  try {
+
+    const url =
+      "https://api.mymemory.translated.net/get" +
+      "?q=" + encodeURIComponent(text) +
+      "&langpair=" + from + "|" + to;
+
+
+    const response =
+      await fetch(url);
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      data &&
+      data.responseData &&
+      data.responseData.translatedText
+    ) {
+
+      result.value =
+        data.responseData.translatedText;
+
+    } else {
+
+      result.value = "";
+
+      alert("ไม่สามารถแปลภาษาได้");
+
+    }
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    result.value = "";
+
+    alert("เกิดข้อผิดพลาดในการเชื่อมต่อระบบแปลภาษา");
+
+  }
+
+}
+
+
+// =====================================
+// ระบบอ่านออกเสียง
+// =====================================
+
+function speakText() {
+
+  const text =
+    document.getElementById("resultText").value.trim();
+
+  const lang =
+    document.getElementById("toLang").value;
+
+
+  if (text === "") {
+
+    alert("ยังไม่มีคำแปล");
+
+    return;
+  }
+
+
+  const speech =
+    new SpeechSynthesisUtterance(text);
+
+
+  if (lang === "th") {
+
+    speech.lang = "th-TH";
+
+  } else {
+
+    speech.lang = "en-US";
+
+  }
+
+
+  speech.rate = 0.9;
+
+  window.speechSynthesis.cancel();
+
+  window.speechSynthesis.speak(speech);
+
+}
+
+
+// =====================================
+// ระบบ OCR
+// =====================================
+
+async function scanImage(event) {
+
+  const file =
+    event.target.files[0];
+
+
+  if (!file) {
+
+    return;
+
+  }
+
+
+  const status =
+    document.getElementById("status");
+
+  const progress =
+    document.getElementById("progress");
+
+  const progressBar =
+    document.getElementById("progressBar");
+
+
+  status.style.display = "block";
+
+  progress.style.display = "block";
+
+  progressBar.style.width = "0%";
+
+
+  status.innerText =
+    "📷 กำลังอ่านข้อความจากรูป...";
+
+
+  try {
+
+    const result =
+      await Tesseract.recognize(
+
+        file,
+
+        "tha+eng",
+
+        {
+
+          logger: function(info) {
+
+            if (
+              info.status ===
+              "recognizing text"
+            ) {
+
+              const percent =
+                Math.round(
+                  info.progress * 100
+                );
+
+
+              progressBar.style.width =
+                percent + "%";
+
+
+              status.innerText =
+                "🔍 กำลังอ่านข้อความ... " +
+                percent +
+                "%";
+
+            }
+
+          }
+
+        }
+
+      );
+
+
+    const text =
+      result.data.text.trim();
+
+
+    if (text === "") {
+
+      status.innerText =
+        "❌ ไม่พบข้อความในรูป";
+
+      return;
+
+    }
+
+
+    document.getElementById(
+      "inputText"
+    ).value = text;
+
+
+    status.innerText =
+      "✅ สแกนข้อความสำเร็จ";
+
+
+    progressBar.style.width =
+      "100%";
+
+
+  } catch (error) {
+
+    console.error(error);
+
+
+    status.innerText =
+      "❌ ไม่สามารถอ่านข้อความจากรูปได้";
+
+
+    alert(
+      "เกิดข้อผิดพลาดในการสแกนข้อความ"
+    );
+
+  }
+
+}
+
+
+// =====================================
+// เปิดกล้อง
+// =====================================
+
+async function openCamera() {
+
+  try {
+
+    if (
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia
+    ) {
+
+      alert(
+        "เบราว์เซอร์นี้ไม่รองรับการเปิดกล้อง"
+      );
+
+      return;
+
+    }
+
+
+    cameraStream =
+      await navigator.mediaDevices.getUserMedia({
+
+        video: {
+
+          facingMode: {
+            ideal: "environment"
+          }
+
+        },
+
+        audio: false
+
+      });
+
+
+    const video =
+      document.getElementById(
+        "cameraVideo"
+      );
+
+
+    video.srcObject =
+      cameraStream;
+
+
+    document.getElementById(
+      "cameraBox"
+    ).style.display = "block";
+
+
+  } catch (error) {
+
+    console.error(
+      "Camera error:",
+      error
+    );
+
+
+    if (error.name === "NotAllowedError") {
+
+      alert(
+        "ไม่ได้รับอนุญาตให้ใช้กล้อง กรุณากด Allow เมื่อ Chrome ถาม"
+      );
+
+    } else if (
+      error.name === "NotFoundError"
+    ) {
+
+      alert(
+        "ไม่พบกล้องในอุปกรณ์นี้"
+      );
+
+    } else {
+
+      alert(
+        "ไม่สามารถเปิดกล้องได้"
+      );
+
+    }
+
+  }
+
+}
+
+
+// =====================================
+// ถ่ายภาพ
+// =====================================
+
+function takePhoto() {
+
+  const video =
+    document.getElementById(
+      "cameraVideo"
+    );
+
+  const canvas =
+    document.getElementById(
+      "cameraCanvas"
+    );
+
+
+  if (
+    !video.videoWidth ||
+    !video.videoHeight
+  ) {
+
+    alert(
+      "กล้องยังไม่พร้อม กรุณารอสักครู่"
+    );
+
+    return;
+
+  }
+
+
+  canvas.width =
+    video.videoWidth;
+
+  canvas.height =
+    video.videoHeight;
+
+
+  const context =
+    canvas.getContext("2d");
+
+
+  context.drawImage(
+
+    video,
+
+    0,
+    0,
+
+    canvas.width,
+    canvas.height
+
+  );
+
+
+  canvas.toBlob(
+
+    function(blob) {
+
+      if (!blob) {
+
+        alert(
+          "ไม่สามารถบันทึกภาพได้"
+        );
+
+        return;
+
+      }
+
+
+      const file =
+        new File(
+
+          [blob],
+
+          "camera-photo.jpg",
+
+          {
+            type: "image/jpeg"
+          }
+
+        );
+
+
+      const fakeEvent = {
+
+        target: {
+
+          files: [file]
+
+        }
+
+      };
+
+
+      scanImage(fakeEvent);
+
+
+      closeCamera();
+
+    },
+
+    "image/jpeg",
+
+    0.9
+
+  );
+
+}
+
+
+// =====================================
+// ปิดกล้อง
+// =====================================
+
+function closeCamera() {
+
+  if (cameraStream) {
+
+    cameraStream
+      .getTracks()
+      .forEach(function(track) {
+
+        track.stop();
+
+      });
+
+
+    cameraStream = null;
+
+  }
+
+
+  document.getElementById(
+    "cameraVideo"
+  ).srcObject = null;
+
+
+  document.getElementById(
+    "cameraBox"
+  ).style.display = "none";
+
+}
+
+</script>
+
+</body>
+</html>
