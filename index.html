@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,7 +10,6 @@
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
   <style>
-
     * {
       box-sizing: border-box;
     }
@@ -81,8 +79,7 @@
       resize: none;
     }
 
-    button,
-    .file-button {
+    button {
       width: 100%;
       padding: 13px;
       margin-top: 10px;
@@ -92,21 +89,30 @@
       color: white;
       font-size: 16px;
       cursor: pointer;
-      display: block;
-      text-align: center;
     }
 
-    button:hover,
-    .file-button:hover {
+    button:hover {
       opacity: 0.9;
     }
 
-    .file-button {
+    .scan {
       background: #d47ac8;
     }
 
     .sound {
       background: #4d91d1;
+    }
+
+    .file-button {
+      display: block;
+      width: 100%;
+      padding: 13px;
+      margin-top: 10px;
+      border-radius: 10px;
+      background: #d47ac8;
+      color: white;
+      text-align: center;
+      cursor: pointer;
     }
 
     #imageInput {
@@ -163,10 +169,8 @@
       font-size: 14px;
       line-height: 1.6;
     }
-
   </style>
 </head>
-
 
 <body>
 
@@ -178,101 +182,70 @@
     Thai ↔ English Translator
   </div>
 
-
   <!-- เลือกภาษา -->
-
   <div class="language">
 
     <select id="fromLang">
-
-      <option value="th">
-        🇹🇭 ไทย
-      </option>
-
-      <option value="en">
-        🇬🇧 English
-      </option>
-
+      <option value="th">🇹🇭 ไทย</option>
+      <option value="en">🇬🇧 English</option>
     </select>
 
     <b>→</b>
 
     <select id="toLang">
-
-      <option value="en">
-        🇬🇧 English
-      </option>
-
-      <option value="th">
-        🇹🇭 ไทย
-      </option>
-
+      <option value="en">🇬🇧 English</option>
+      <option value="th">🇹🇭 ไทย</option>
     </select>
 
   </div>
 
-
   <!-- ข้อความต้นฉบับ -->
-
   <div class="box">
 
-    <label>
-      ข้อความต้นฉบับ
-    </label>
+    <label>ข้อความต้นฉบับ</label>
 
     <textarea
       id="inputText"
-      placeholder="พิมพ์ข้อความ หรือสแกนจากรูปภาพ"></textarea>
-
+      placeholder="พิมพ์ข้อความ หรือสแกนจากรูปภาพ"
+    ></textarea>
 
     <!-- เปิดกล้อง -->
-
     <button
       type="button"
-      class="file-button"
-      onclick="openCamera()">
-
+      class="scan"
+      onclick="openCamera()"
+    >
       📷 เปิดกล้อง
-
     </button>
 
-
     <!-- กล้อง -->
-
     <div id="cameraBox">
 
       <video
         id="cameraVideo"
         autoplay
-        playsinline>
-      </video>
-
+        playsinline
+      ></video>
 
       <button
         type="button"
-        onclick="takePhoto()">
-
+        onclick="takePhoto()"
+      >
         📸 ถ่ายภาพ
-
       </button>
-
 
       <button
         type="button"
-        onclick="closeCamera()">
-
+        onclick="closeCamera()"
+      >
         ❌ ปิดกล้อง
-
       </button>
-
 
       <canvas id="cameraCanvas"></canvas>
 
     </div>
 
-
     <!-- เลือกรูป -->
-
     <label class="file-button">
 
       🖼️ เลือกรูปจากเครื่อง
@@ -281,192 +254,129 @@
         id="imageInput"
         type="file"
         accept="image/*"
-        onchange="scanImage(event)">
+        onchange="scanImage(event)"
+      >
 
     </label>
 
-
     <div class="tip">
-
       💡 <b>เคล็ดลับ:</b>
       ถ่ายภาพให้ตัวหนังสืออยู่ตรง ๆ
       มีแสงเพียงพอ และภาพไม่เบลอ
-      เพื่อให้ระบบอ่านข้อความได้แม่นยำขึ้น
-
+      เพื่อให้ OCR อ่านได้แม่นยำขึ้น
     </div>
 
   </div>
 
-
   <!-- สถานะ OCR -->
-
   <div id="status">
     กำลังอ่านข้อความจากรูป...
   </div>
 
-
-  <div
-    class="progress"
-    id="progress">
-
+  <div class="progress" id="progress">
     <div id="progressBar"></div>
-
   </div>
 
-
   <!-- แปลภาษา -->
-
   <button onclick="translateText()">
-
     🌐 แปลภาษา
-
   </button>
 
-
   <!-- ผลลัพธ์ -->
-
   <div class="box">
 
-    <label>
-      คำแปล
-    </label>
+    <label>คำแปล</label>
 
     <textarea
       id="resultText"
       placeholder="คำแปลจะแสดงที่นี่"
-      readonly>
-    </textarea>
-
+      readonly
+    ></textarea>
 
     <button
       class="sound"
-      onclick="speakText()">
-
+      onclick="speakText()"
+    >
       🔊 อ่านออกเสียง
-
     </button>
 
   </div>
 
 </div>
 
-
-
 <script>
 
-
-// ======================================================
-// URL Google Apps Script
-// ======================================================
+/* =====================================================
+   URL ของ Google Apps Script Web App
+   ===================================================== */
 
 const SCRIPT_URL =
   "ใส่ Web App URL ตรงนี้";
 
 
-
-// ======================================================
-// ระบบแปลภาษา
-// ======================================================
+/* =====================================================
+   ระบบแปลภาษา
+   ===================================================== */
 
 async function translateText() {
 
   const text =
-    document
-      .getElementById("inputText")
-      .value
-      .trim();
-
+    document.getElementById("inputText").value.trim();
 
   const from =
-    document
-      .getElementById("fromLang")
-      .value;
-
+    document.getElementById("fromLang").value;
 
   const to =
-    document
-      .getElementById("toLang")
-      .value;
-
+    document.getElementById("toLang").value;
 
   const resultText =
-    document
-      .getElementById("resultText");
-
+    document.getElementById("resultText");
 
   if (text === "") {
 
-    alert(
-      "กรุณาใส่ข้อความก่อน"
-    );
-
+    alert("กรุณาใส่ข้อความก่อน");
     return;
+
   }
 
+  if (SCRIPT_URL === "ใส่ Web App URL ตรงนี้") {
 
-  if (
-    SCRIPT_URL ===
-    "ใส่ Web App URL ตรงนี้"
-  ) {
-
-    alert(
-      "ยังไม่ได้ใส่ Web App URL ของ Google Apps Script"
-    );
-
+    alert("ยังไม่ได้ใส่ Web App URL ของ Google Apps Script");
     return;
-  }
 
+  }
 
   if (from === to) {
 
-    resultText.value =
-      text;
-
+    resultText.value = text;
     return;
+
   }
 
-
-  resultText.value =
-    "กำลังแปล...";
-
+  resultText.value = "กำลังแปล...";
 
   try {
 
-    const response =
-      await fetch(
+    const response = await fetch(
+      SCRIPT_URL,
+      {
+        method: "POST",
 
-        SCRIPT_URL,
+        headers: {
+          "Content-Type":
+            "text/plain;charset=utf-8"
+        },
 
-        {
-
-          method: "POST",
-
-          headers: {
-
-            "Content-Type":
-              "text/plain;charset=utf-8"
-
-          },
-
-          body:
-            JSON.stringify({
-
-              text: text,
-
-              from: from,
-
-              to: to
-
-            })
-
-        }
-
-      );
-
+        body: JSON.stringify({
+          text: text,
+          from: from,
+          to: to
+        })
+      }
+    );
 
     const data =
       await response.json();
-
 
     if (data.success) {
 
@@ -475,8 +385,7 @@ async function translateText() {
 
     } else {
 
-      resultText.value =
-        "";
+      resultText.value = "";
 
       alert(
         "เกิดข้อผิดพลาด: " +
@@ -485,13 +394,11 @@ async function translateText() {
 
     }
 
-
   } catch (error) {
 
     console.error(error);
 
-    resultText.value =
-      "";
+    resultText.value = "";
 
     alert(
       "ไม่สามารถเชื่อมต่อระบบแปลภาษาได้"
@@ -502,463 +409,299 @@ async function translateText() {
 }
 
 
-
-// ======================================================
-// อ่านออกเสียง
-// ======================================================
+/* =====================================================
+   อ่านออกเสียง
+   ===================================================== */
 
 function speakText() {
 
   const text =
-    document
-      .getElementById("resultText")
-      .value
-      .trim();
-
+    document.getElementById("resultText").value.trim();
 
   const lang =
-    document
-      .getElementById("toLang")
-      .value;
-
+    document.getElementById("toLang").value;
 
   if (text === "") {
 
-    alert(
-      "ยังไม่มีคำแปล"
-    );
-
+    alert("ยังไม่มีคำแปล");
     return;
 
   }
 
-
   const speech =
-    new SpeechSynthesisUtterance(
-      text
-    );
-
+    new SpeechSynthesisUtterance(text);
 
   if (lang === "th") {
 
-    speech.lang =
-      "th-TH";
+    speech.lang = "th-TH";
 
   } else {
 
-    speech.lang =
-      "en-US";
+    speech.lang = "en-US";
 
   }
 
-
-  speech.rate =
-    0.9;
-
+  speech.rate = 0.9;
 
   window.speechSynthesis.cancel();
 
-  window.speechSynthesis.speak(
-    speech
-  );
+  window.speechSynthesis.speak(speech);
 
 }
 
 
-
-// ======================================================
-// เตรียมภาพก่อน OCR
-// ======================================================
+/* =====================================================
+   เตรียมภาพก่อน OCR
+   ===================================================== */
 
 function prepareImageForOCR(file) {
 
-  return new Promise(
-    function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
 
-      const reader =
-        new FileReader();
+    const reader =
+      new FileReader();
 
+    reader.onload =
+      function(event) {
 
-      reader.onload =
-        function(event) {
+        const img =
+          new Image();
 
-          const img =
-            new Image();
+        img.onload =
+          function() {
 
+            let scale = 2;
 
-          img.onload =
-            function() {
+            let width =
+              img.width * scale;
 
+            let height =
+              img.height * scale;
 
-              // --------------------------------
-              // ขยายภาพ
-              // --------------------------------
+            const maxWidth = 2500;
+            const maxHeight = 2500;
 
-              let scale = 2;
+            if (width > maxWidth) {
 
+              const ratio =
+                maxWidth / width;
 
-              let width =
-                img.width * scale;
+              width = maxWidth;
 
+              height =
+                height * ratio;
 
-              let height =
-                img.height * scale;
+            }
 
+            if (height > maxHeight) {
 
-              // จำกัดขนาดไม่ให้ใหญ่เกินไป
+              const ratio =
+                maxHeight / height;
 
-              const maxWidth =
-                2500;
+              height = maxHeight;
 
+              width =
+                width * ratio;
 
-              const maxHeight =
-                2500;
+            }
 
+            const canvas =
+              document.createElement("canvas");
 
-              if (
-                width > maxWidth
-              ) {
+            canvas.width =
+              Math.round(width);
 
-                const ratio =
-                  maxWidth / width;
+            canvas.height =
+              Math.round(height);
 
-                width =
-                  maxWidth;
+            const ctx =
+              canvas.getContext("2d");
 
-                height =
-                  height * ratio;
+            ctx.fillStyle = "#ffffff";
 
-              }
+            ctx.fillRect(
+              0,
+              0,
+              canvas.width,
+              canvas.height
+            );
 
+            ctx.imageSmoothingEnabled = false;
 
-              if (
-                height > maxHeight
-              ) {
+            ctx.drawImage(
+              img,
+              0,
+              0,
+              canvas.width,
+              canvas.height
+            );
 
-                const ratio =
-                  maxHeight / height;
-
-                height =
-                  maxHeight;
-
-                width =
-                  width * ratio;
-
-              }
-
-
-              const canvas =
-                document.createElement(
-                  "canvas"
-                );
-
-
-              canvas.width =
-                Math.round(width);
-
-
-              canvas.height =
-                Math.round(height);
-
-
-              const ctx =
-                canvas.getContext(
-                  "2d"
-                );
-
-
-              // --------------------------------
-              // ทำพื้นหลังให้ขาว
-              // --------------------------------
-
-              ctx.fillStyle =
-                "#ffffff";
-
-              ctx.fillRect(
+            const imageData =
+              ctx.getImageData(
                 0,
                 0,
                 canvas.width,
                 canvas.height
               );
 
+            const data =
+              imageData.data;
 
-              // --------------------------------
-              // เพิ่มความคม
-              // --------------------------------
+            for (
+              let i = 0;
+              i < data.length;
+              i += 4
+            ) {
 
-              ctx.imageSmoothingEnabled =
-                false;
+              const r = data[i];
+              const g = data[i + 1];
+              const b = data[i + 2];
 
+              const gray =
+                r * 0.299 +
+                g * 0.587 +
+                b * 0.114;
 
-              ctx.drawImage(
+              let value =
+                (gray - 128) * 1.5 + 128;
 
-                img,
-
-                0,
-                0,
-
-                canvas.width,
-                canvas.height
-
-              );
-
-
-              // --------------------------------
-              // แปลงเป็นขาวดำ
-              // --------------------------------
-
-              const imageData =
-                ctx.getImageData(
-
+              value =
+                Math.max(
                   0,
-                  0,
-
-                  canvas.width,
-                  canvas.height
-
+                  Math.min(255, value)
                 );
 
+              data[i] = value;
+              data[i + 1] = value;
+              data[i + 2] = value;
 
-              const data =
-                imageData.data;
+            }
 
+            ctx.putImageData(
+              imageData,
+              0,
+              0
+            );
 
-              for (
-                let i = 0;
-                i < data.length;
-                i += 4
-              ) {
+            canvas.toBlob(
+              function(blob) {
 
+                if (blob) {
 
-                const r =
-                  data[i];
+                  resolve(blob);
 
+                } else {
 
-                const g =
-                  data[i + 1];
-
-
-                const b =
-                  data[i + 2];
-
-
-                // คำนวณความสว่าง
-
-                const gray =
-                  (
-                    r * 0.299 +
-                    g * 0.587 +
-                    b * 0.114
-                  );
-
-
-                // ปรับ contrast
-
-                let value =
-                  (
-                    gray - 128
-                  ) * 1.5 + 128;
-
-
-                value =
-                  Math.max(
-                    0,
-                    Math.min(
-                      255,
-                      value
+                  reject(
+                    new Error(
+                      "ไม่สามารถเตรียมภาพได้"
                     )
                   );
 
+                }
 
-                data[i] =
-                  value;
+              },
+              "image/png"
+            );
 
+          };
 
-                data[i + 1] =
-                  value;
+        img.onerror =
+          function() {
 
+            reject(
+              new Error(
+                "ไม่สามารถอ่านภาพได้"
+              )
+            );
 
-                data[i + 2] =
-                  value;
+          };
 
-              }
+        img.src =
+          event.target.result;
 
+      };
 
-              ctx.putImageData(
-                imageData,
-                0,
-                0
-              );
+    reader.onerror =
+      function() {
 
+        reject(
+          new Error(
+            "ไม่สามารถโหลดภาพได้"
+          )
+        );
 
-              canvas.toBlob(
+      };
 
-                function(blob) {
+    reader.readAsDataURL(file);
 
-                  if (blob) {
-
-                    resolve(blob);
-
-                  } else {
-
-                    reject(
-                      new Error(
-                        "ไม่สามารถเตรียมภาพได้"
-                      )
-                    );
-
-                  }
-
-                },
-
-                "image/png"
-
-              );
-
-            };
-
-
-          img.onerror =
-            function() {
-
-              reject(
-                new Error(
-                  "ไม่สามารถอ่านภาพได้"
-                )
-              );
-
-            };
-
-
-          img.src =
-            event.target.result;
-
-        };
-
-
-      reader.onerror =
-        function() {
-
-          reject(
-            new Error(
-              "ไม่สามารถโหลดภาพได้"
-            )
-          );
-
-        };
-
-
-      reader.readAsDataURL(
-        file
-      );
-
-    }
-  );
+  });
 
 }
 
 
-
-// ======================================================
-// OCR
-// ======================================================
+/* =====================================================
+   ระบบ OCR ไทย + อังกฤษ
+   ===================================================== */
 
 async function scanImage(event) {
 
   const file =
     event.target.files[0];
 
-
   if (!file) {
-
     return;
-
   }
 
-
   const status =
-    document
-      .getElementById("status");
-
+    document.getElementById("status");
 
   const progress =
-    document
-      .getElementById("progress");
-
+    document.getElementById("progress");
 
   const progressBar =
-    document
-      .getElementById("progressBar");
+    document.getElementById("progressBar");
 
+  status.style.display = "block";
 
-  status.style.display =
-    "block";
+  progress.style.display = "block";
 
-
-  progress.style.display =
-    "block";
-
-
-  progressBar.style.width =
-    "0%";
-
+  progressBar.style.width = "0%";
 
   status.innerText =
     "🖼️ กำลังเตรียมภาพ...";
 
-
   try {
 
-
-    // --------------------------------
-    // ปรับภาพก่อน OCR
-    // --------------------------------
-
     const processedImage =
-      await prepareImageForOCR(
-        file
-      );
-
+      await prepareImageForOCR(file);
 
     status.innerText =
-      "🔍 กำลังอ่านข้อความภาษาไทย...";
-
+      "📚 กำลังเตรียมระบบ OCR...";
 
     progressBar.style.width =
       "10%";
 
-
-    // --------------------------------
-    // OCR
-    // --------------------------------
-
     const result =
       await Tesseract.recognize(
-
         processedImage,
-
         "tha+eng",
-
         {
 
           logger:
             function(info) {
 
-
               console.log(info);
-
 
               if (
                 info.status ===
                 "recognizing text"
               ) {
 
-
                 const percent =
                   Math.round(
                     info.progress * 100
                   );
-
 
                 const displayPercent =
                   10 +
@@ -966,10 +709,8 @@ async function scanImage(event) {
                     percent * 0.9
                   );
 
-
                 progressBar.style.width =
                   displayPercent + "%";
-
 
                 status.innerText =
                   "🔍 กำลังอ่านข้อความ... " +
@@ -977,7 +718,6 @@ async function scanImage(event) {
                   "%";
 
               }
-
 
               else if (
                 info.status ===
@@ -988,7 +728,6 @@ async function scanImage(event) {
                   "📚 กำลังโหลดภาษาไทย...";
 
               }
-
 
               else if (
                 info.status ===
@@ -1003,82 +742,51 @@ async function scanImage(event) {
             }
 
         }
-
       );
-
-
-    // --------------------------------
-    // รับข้อความ
-    // --------------------------------
 
     let text =
       result.data.text;
 
-
-    // --------------------------------
-    // ทำความสะอาดข้อความ
-    // --------------------------------
-
     text =
-      cleanOCRText(
-        text
-      );
+      cleanOCRText(text);
 
-
-    if (
-      text.trim() === ""
-    ) {
+    if (text === "") {
 
       status.innerText =
         "❌ ไม่พบข้อความในรูป";
 
-
       progressBar.style.width =
         "100%";
-
 
       return;
 
     }
 
-
-    // --------------------------------
-    // แสดงข้อความ
-    // --------------------------------
-
-    document
-      .getElementById("inputText")
-      .value =
-      text;
-
+    document.getElementById(
+      "inputText"
+    ).value = text;
 
     status.innerText =
       "✅ อ่านข้อความสำเร็จ";
 
-
     progressBar.style.width =
       "100%";
 
-
   } catch (error) {
-
 
     console.error(
       "OCR ERROR:",
       error
     );
 
-
     status.innerText =
       "❌ ไม่สามารถอ่านข้อความได้";
-
 
     progressBar.style.width =
       "0%";
 
-
     alert(
-      "เกิดข้อผิดพลาดในการอ่านข้อความ กรุณาลองถ่ายภาพใหม่ให้ชัดขึ้น"
+      "เกิดข้อผิดพลาดในการอ่านข้อความ กรุณาถ่ายภาพใหม่ให้ชัดขึ้น"
     );
 
   }
@@ -1086,22 +794,15 @@ async function scanImage(event) {
 }
 
 
-
-// ======================================================
-// ทำความสะอาดข้อความ OCR
-// ======================================================
+/* =====================================================
+   ทำความสะอาดข้อความ OCR
+   ===================================================== */
 
 function cleanOCRText(text) {
 
-
   if (!text) {
-
     return "";
-
   }
-
-
-  // ลบช่องว่างซ้ำ
 
   text =
     text.replace(
@@ -1109,45 +810,31 @@ function cleanOCRText(text) {
       " "
     );
 
-
-  // ลบบรรทัดว่างซ้ำ
-
   text =
     text.replace(
       /\n{3,}/g,
       "\n\n"
     );
 
-
-  // ตัดช่องว่างต้นท้าย
-
-  text =
-    text.trim();
-
-
-  return text;
+  return text.trim();
 
 }
 
 
+/* =====================================================
+   ระบบกล้อง
+   ===================================================== */
 
-// ======================================================
-// ตัวแปรกล้อง
-// ======================================================
-
-let cameraStream =
-  null;
+let cameraStream = null;
 
 
-
-// ======================================================
-// เปิดกล้อง
-// ======================================================
+/* =====================================================
+   เปิดกล้อง
+   ===================================================== */
 
 async function openCamera() {
 
   try {
-
 
     if (
       !navigator.mediaDevices ||
@@ -1162,60 +849,48 @@ async function openCamera() {
 
     }
 
-
     cameraStream =
-      await navigator.mediaDevices
-        .getUserMedia({
+      await navigator.mediaDevices.getUserMedia({
 
-          video: {
+        video: {
 
-            facingMode: {
-              ideal:
-                "environment"
-            },
-
-            width: {
-              ideal: 1920
-            },
-
-            height: {
-              ideal: 1080
-            }
-
+          facingMode: {
+            ideal: "environment"
           },
 
-          audio: false
+          width: {
+            ideal: 1920
+          },
 
-        });
+          height: {
+            ideal: 1080
+          }
 
+        },
+
+        audio: false
+
+      });
 
     const video =
-      document
-        .getElementById(
-          "cameraVideo"
-        );
-
+      document.getElementById(
+        "cameraVideo"
+      );
 
     video.srcObject =
       cameraStream;
 
-
-    document
-      .getElementById(
-        "cameraBox"
-      )
-      .style.display =
+    document.getElementById(
+      "cameraBox"
+    ).style.display =
       "block";
 
-
   } catch (error) {
-
 
     console.error(
       "Camera error:",
       error
     );
-
 
     if (
       error.name ===
@@ -1223,11 +898,12 @@ async function openCamera() {
     ) {
 
       alert(
-        "ไม่ได้รับอนุญาตให้ใช้กล้อง กรุณากด Allow"
+        "ไม่ได้รับอนุญาตให้ใช้กล้อง กรุณากด Allow เมื่อ Chrome ถาม"
       );
 
+    }
 
-    } else if (
+    else if (
       error.name ===
       "NotFoundError"
     ) {
@@ -1236,8 +912,9 @@ async function openCamera() {
         "ไม่พบกล้องในอุปกรณ์นี้"
       );
 
+    }
 
-    } else {
+    else {
 
       alert(
         "ไม่สามารถเปิดกล้องได้"
@@ -1250,27 +927,21 @@ async function openCamera() {
 }
 
 
-
-// ======================================================
-// ถ่ายภาพ
-// ======================================================
+/* =====================================================
+   ถ่ายภาพ
+   ===================================================== */
 
 function takePhoto() {
 
-
   const video =
-    document
-      .getElementById(
-        "cameraVideo"
-      );
-
+    document.getElementById(
+      "cameraVideo"
+    );
 
   const canvas =
-    document
-      .getElementById(
-        "cameraCanvas"
-      );
-
+    document.getElementById(
+      "cameraCanvas"
+    );
 
   if (
     !video.videoWidth ||
@@ -1285,46 +956,28 @@ function takePhoto() {
 
   }
 
-
-  // ใช้ความละเอียดจากกล้องจริง
-
   canvas.width =
     video.videoWidth;
-
 
   canvas.height =
     video.videoHeight;
 
-
   const context =
-    canvas.getContext(
-      "2d"
-    );
-
+    canvas.getContext("2d");
 
   context.imageSmoothingEnabled =
     false;
 
-
   context.drawImage(
-
     video,
-
     0,
-
     0,
-
     canvas.width,
-
     canvas.height
-
   );
 
-
   canvas.toBlob(
-
     function(blob) {
-
 
       if (!blob) {
 
@@ -1336,99 +989,64 @@ function takePhoto() {
 
       }
 
-
       const file =
         new File(
-
           [blob],
-
           "camera-photo.jpg",
-
           {
-            type:
-              "image/jpeg"
+            type: "image/jpeg"
           }
-
         );
-
 
       const fakeEvent = {
 
         target: {
-
           files: [file]
-
         }
 
       };
 
-
-      scanImage(
-        fakeEvent
-      );
-
+      scanImage(fakeEvent);
 
       closeCamera();
 
-
     },
-
     "image/jpeg",
-
     0.95
-
   );
 
 }
 
 
-
-// ======================================================
-// ปิดกล้อง
-// ======================================================
+/* =====================================================
+   ปิดกล้อง
+   ===================================================== */
 
 function closeCamera() {
 
-
   if (cameraStream) {
-
 
     cameraStream
       .getTracks()
       .forEach(
-
         function(track) {
-
           track.stop();
-
         }
-
       );
 
-
-    cameraStream =
-      null;
+    cameraStream = null;
 
   }
 
+  document.getElementById(
+    "cameraVideo"
+  ).srcObject = null;
 
-  document
-    .getElementById(
-      "cameraVideo"
-    )
-    .srcObject =
-    null;
-
-
-  document
-    .getElementById(
-      "cameraBox"
-    )
-    .style.display =
-    "none";
+  document.getElementById(
+    "cameraBox"
+  ).style.display = "none";
 
 }
-
 
 </script>
 
